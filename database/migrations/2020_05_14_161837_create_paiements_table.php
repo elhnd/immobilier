@@ -19,6 +19,10 @@ class CreatePaiementsTable extends Migration
             $table->integer('commission');
             $table->integer('taxes')->nullable();
             $table->integer('montant');
+            $table->integer('charge')->nullable();
+            $table->integer('tva')->nullable();
+            $table->integer('teom')->nullable();
+            $table->integer('de')->nullable();
             $table->string('date');
             $table->string('commentaire')->nullable();
             $table->string('ref');

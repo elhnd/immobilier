@@ -155,19 +155,19 @@
                                     <router-link to="/louer" class="nav-link">
                                         <i class="fas fa-circle nav-icon" style="color:#0879FA"></i>
 
-                                        <p style="color:black">location</p>
+                                        <p style="color:black">À Loués</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item ">
                                     <router-link to="/revoque" class="nav-link">
                                         <i class="fas fa-circle nav-icon" style="color:#0879FA"></i>
-                                        <p style="color:black">révoque</p>
+                                        <p style="color:black">Biens Loués</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item ">
                                     <router-link to="/paiement" class="nav-link">
                                         <i class="fas fa-circle nav-icon" style="color:#0879FA"></i>
-                                        <p style="color:black">comptablité</p>
+                                        <p style="color:black">Comptablité</p>
                                     </router-link>
                                 </li>
                                 <li class="nav-item ">

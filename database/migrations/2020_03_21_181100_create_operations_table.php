@@ -22,6 +22,10 @@ class CreateOperationsTable extends Migration
             $table->integer('taxes')->nullable();
             $table->integer('durée')->nullable();
             $table->string('dernierelevé')->nullable();
+            $table->integer('charge')->nullable();
+            $table->integer('tva')->nullable();
+            $table->integer('teom')->nullable();
+            $table->integer('de')->nullable();
             $table->integer('montantPaye');
             $table->date('dateEntre');
             $table->string('piece')->nullable();

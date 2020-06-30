@@ -363,7 +363,7 @@
       <biens-louer></biens-louer>
     </div>
     <div>
-      <biens-non-louer></biens-non-louer>
+      <biens-non-louer ref="nonlouer"></biens-non-louer>
     </div>
     <div v-if="!$gate.isAdminOrBailleurs()">
       <not-found></not-found>
@@ -973,7 +973,11 @@ export default {
         .then(() => {
           //this will update dom automatically
           //this.loadbiens();
-          Swal.fire("Modification...", "Équipement modifié avec succès", "success");
+          Swal.fire(
+            "Modification...",
+            "Équipement modifié avec succès",
+            "success"
+          );
           Fire.$emit("AfterCreate");
           this.$Progress.finish();
           this.Emode = false;
@@ -986,7 +990,6 @@ export default {
     },
     deleteEquip(e) {
       Swal.fire({
-
         title: "Ếtes vous sûr?",
         text: "Cette action est irréversible!",
         icon: "warning",
@@ -1030,6 +1033,7 @@ export default {
           //this.loadbiens();
           $("#addNew").modal("hide");
           Swal.fire("Modification...", "Bien modifié avec succès", "success");
+          this.loadbiens();
           Fire.$emit("AfterCreate");
           this.$Progress.finish();
           this.editbien = false;
@@ -1037,7 +1041,7 @@ export default {
         })
         .catch(() => {
           this.$Progress.fail();
-           Swal.fire("Oup...!", "Erreur modification, réessayer", "error");
+          Swal.fire("Oup...!", "Erreur modification, réessayer", "error");
         });
     },
     editModal(equip) {
@@ -1081,7 +1085,12 @@ export default {
           this.form
             .delete("api/biens/" + id)
             .then(() => {
-              Swal.fire("Suppression...", "Bien supprimé avec succès", "success");
+              this.loadbiens();
+              Swal.fire(
+                "Suppression...",
+                "Bien supprimé avec succès",
+                "success"
+              );
               Fire.$emit("AfterCreate");
             })
             .catch(() => {
@@ -1092,7 +1101,10 @@ export default {
     },
     loadbiens() {
       if (this.$gate.isAdminOrBailleurs()) {
-        axios.get("/api/biens").then(({ data }) => (this.Biens = data));
+        axios.get("/api/biens").then(({ data }) => {
+          this.Biens = data;
+          this.$refs.nonlouer.getResults();
+        });
       }
     },
     createBiens() {
@@ -1229,7 +1241,11 @@ export default {
         .then(() => {
           //this will update dom automatically
           //this.loadbiens();
-          Swal.fire("Modification...", "Équipement modifié avec succès", "success");
+          Swal.fire(
+            "Modification...",
+            "Équipement modifié avec succès",
+            "success"
+          );
           Fire.$emit("AfterCreate");
           this.$Progress.finish();
           this.Etatmode = false;

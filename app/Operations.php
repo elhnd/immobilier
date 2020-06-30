@@ -12,7 +12,7 @@ class Operations  extends Model
      * @var array
      */
     protected $fillable = [
-        'operation_id','caution','montantPaye','dateEntre','ref','louer','numero'
+        'operation_id','caution','montantPaye','dateEntre','ref','louer','numero','commentaire'
     ];
            /**
      * Get the biens for the blog post.

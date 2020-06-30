@@ -162,16 +162,31 @@
                       </div>
                       <div class="col-sm-6">
                         <div class="form-group">
-                          <label class="form-control-label">taxe</label>
+                          <label class="form-control-label">Charge</label>
                           <input
-                            v-model="form.taxes"
+                            v-model="form.charge"
                             type="number"
                             class="form-control"
                             min="0"
-                            placeholder="taxe"
-                            :class="{ 'is-invalid': form.errors.has('taxes') }"
+                            placeholder="charge"
+                            :class="{ 'is-invalid': form.errors.has('charge') }"
                           />
-                          <has-error :form="form" field="taxes"></has-error>
+                          <has-error :form="form" field="charge"></has-error>
+                        </div>
+                      </div>
+
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <input type="checkbox" v-model="form.tva" />
+                          <label class="form-control-label">TVA</label>
+                        </div>
+                        <div class="form-group">
+                          <input type="checkbox" v-model="form.teom" />
+                          <label class="form-control-label">TEOM</label>
+                        </div>
+                        <div class="form-group">
+                          <input type="checkbox" v-model="form.de" />
+                          <label class="form-control-label">DE</label>
                         </div>
                       </div>
                     </div>
@@ -206,7 +221,7 @@
                     <div class="row" v-if="showForm2">
                       <div class="col-sm-6">
                         <div class="form-group">
-                          <label class="form-control-label">derniere levé</label>
+                          <label class="form-control-label">derniere relevée</label>
                           <input
                             type="file"
                             class="form-control"
@@ -223,6 +238,7 @@
                             type="text"
                             class="form-control"
                             name="commentaire"
+                             v-model="form.commentaire"
                             :class="{ 'is-invalid': form.errors.has('commentaire') }"
                           ></textarea>
                           <has-error :form="form" field="commentaire"></has-error>
@@ -606,11 +622,14 @@ export default {
         libelleE: "",
         numero: "",
         commission: "",
-        taxes: "",
+        tva: false,
+        teom: false,
+        de: false,
         durée: "",
         dernierelevé: "",
         piece: "",
-        commentaire: ""
+        commentaire: "",
+        charge: ""
       }),
       formT: new Form({
         numero: ""
@@ -661,11 +680,14 @@ export default {
       fichier.append("libelleE", this.form.libelleE);
       fichier.append("numero", this.form.numero);
       fichier.append("commission", this.form.commission);
-      fichier.append("taxes", this.form.taxes);
+      fichier.append("tva", this.form.tva);
+      fichier.append("teom", this.form.teom);
+      fichier.append("de", this.form.de);
       fichier.append("durée", this.form.durée);
       fichier.append("dernierelevé", this.derniereleve);
       fichier.append("piece", this.piece);
       fichier.append("commentaire", this.form.commentaire);
+      fichier.append("charge", this.form.charge);
 
       axios
         .post("/api/louer", fichier)
@@ -704,22 +726,29 @@ export default {
         });
     },
     findClient() {
-      this.formT.post("/api/findclient").then(response => {
-        if(Object.keys(response.data).length===0){
-          Swal.fire("Oups..!", "Ce numéro n'existe pas, vérifier puis réessayer", "error");
-        }
-        let client = response.data;
-        this.form.client = client.nom;
-        this.form.numero = client.tel;
-        this.clientD.nom = client.nom;
-        this.clientD.prenom = client.prenom;
-        if (this.clientD.prenom) {
-          this.showForm2 = true;
-        }
-      }).catch(error=>{
-        console.log(error)
-        Swal.fire("Oups..!", "Erreur serveur, réessayer", "error");
-      });
+      this.formT
+        .post("/api/findclient")
+        .then(response => {
+          if (Object.keys(response.data).length === 0) {
+            Swal.fire(
+              "Oups..!",
+              "Ce numéro n'existe pas, vérifier puis réessayer",
+              "error"
+            );
+          }
+          let client = response.data;
+          this.form.client = client.nom;
+          this.form.numero = client.tel;
+          this.clientD.nom = client.nom;
+          this.clientD.prenom = client.prenom;
+          if (this.clientD.prenom) {
+            this.showForm2 = true;
+          }
+        })
+        .catch(error => {
+          console.log(error);
+          Swal.fire("Oups..!", "Erreur serveur, réessayer", "error");
+        });
     },
     annuler() {
       location.reload();
@@ -762,7 +791,7 @@ export default {
 
       if (this.ext_image2.indexOf(this.piece.type) < 0) {
         Swal.fire({
-          icon:"error",
+          icon: "error",
           type: "error",
           title: "Oops...",
           text: "Fichiers images et pdf seulements autorisés "

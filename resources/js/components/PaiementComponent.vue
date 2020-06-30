@@ -166,9 +166,24 @@
                 type="month"
                 class="form-control"
                 name="date"
-                id="inlineFormInputGroup"
                 placeholder="mois"
                 :class="{ 'is-invalid': form.errors.has('date') }"
+              />
+              <has-error :form="form" field="date"></has-error>
+            </div>
+          </div>
+          <div class="col">
+            <div class="input-group mb-2">
+              <div class="input-group-prepend">
+                <div class="input-group-text">fcfa</div>
+              </div>
+              <input
+                v-model="form.charge"
+                type="text"
+                class="form-control"
+                name="charge"
+                placeholder="charge"
+                :class="{ 'is-invalid': form.errors.has('charge') }"
               />
               <has-error :form="form" field="date"></has-error>
             </div>
@@ -183,16 +198,30 @@
                 type="text"
                 class="form-control"
                 name="montant"
-                id="inlineFormInputGroup"
                 placeholder="montant"
                 :class="{ 'is-invalid': form.errors.has('montant') }"
               />
               <has-error :form="form" field="date"></has-error>
             </div>
           </div>
-          <div class="col">
-            <button type="submit" class="btn btn-primary mb-2">Paiement</button>
+        </div>
+        <div class="col" style="margin-left:41px;margin-top:10px">
+          <div class="form-group">
+            <input type="checkbox" v-model="form.tva" />
+            <label class="form-control-label">TVA</label>
           </div>
+
+          <div class="form-group">
+            <input type="checkbox" v-model="form.teom" />
+            <label class="form-control-label">TEOM</label>
+          </div>
+          <div class="form-group">
+            <input type="checkbox" v-model="form.de" />
+            <label class="form-control-label">DE</label>
+          </div>
+        </div>
+        <div class="col" style="margin-left:41px">
+          <button type="submit" class="btn btn-primary mb-2">Paiement</button>
         </div>
       </form>
     </section>
@@ -353,7 +382,11 @@ export default {
         commission: "",
         prix: "",
         montant: "",
-        tel: ""
+        tel: "",
+        tva: false,
+        teom: false,
+        de: false,
+        charge: ""
       })
     };
   },
@@ -364,7 +397,9 @@ export default {
         this.Operation = response.data;
       });
     },
-    Annuler() {location.reload();},
+    Annuler() {
+      location.reload();
+    },
     printDetails() {
       window.print();
       this.recu = false;

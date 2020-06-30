@@ -127,8 +127,8 @@ class OperationsController extends Controller
                 'message' => "Le montant payé ne doit être supérieur 5 fois au prix de la location"
             ]);
         }
-        $montant =    $request['montantPaye'] * $request['taxes'] / 100;
-        $montantttc = $montant - $request['commission'];
+
+
 
         $Operation = new Operations();
 
@@ -141,21 +141,51 @@ class OperationsController extends Controller
             $Operation->piece = $piece;
         }
 
-        $Operation->caution = $request['caution'];
-        $Operation->montantPaye = $montantttc;
         $Operation->dateEntre = date("H:i:s", strtotime(request('dateEntre')));
-        $Operation->commission = $request['commission'];
-        $Operation->taxes = $request['taxes'];
         $Operation->durée = $request['durée'];
         $Operation->dateEntre = $request['dateEntre'];
         $Operation->commentaire = $request['commentaire'];
 
+        $montant =    $request['montantPaye'];
+
+        $Operation->caution = $request['caution'];
+
+        $Operation->charge = $request['charge'];
+
+        $Operation->commission = $request['commission'];
+
+        $charge =  $request['charge'] + $request['montantPaye'];
+
+        if ($request['tva'] == "true") {
+            $Operation->tva =  $request['montantPaye'] * 0.18;
+        } else {
+            $Operation->tva = 0;
+        }
+        if ($request['teom'] == "true") {
+            $Operation->teom =  $request['montantPaye'] * 0.036;
+        } else {
+            $Operation->teom =  0;
+        }
+        if ($request['de'] == "true") {
+            $Operation->de =  $request['montantPaye'] * 0.02;
+        } else {
+            $Operation->de = 0;
+        }
+
+        $Operation->taxes =  $Operation->tva +  $Operation->teom + $Operation->de;
+
+        $sup = $Operation->taxes + $charge;
+
+        $Operation->montantPaye = $sup + $Operation->caution;
+
         $Operation->clients = $client->client_id;
         $Operation->biens = $bien->bien_id;
         $Operation->ref = rand(0, 1000000);
+
         //update bien
         $soleBien = $bien->solde + $request['montantPaye'];
 
+        // dd($Operation);
         DB::table('biens')
             ->where('bien_id', $bien->bien_id)
             ->update(['louer' => true, 'solde' => $soleBien]);
@@ -174,17 +204,20 @@ class OperationsController extends Controller
         } else {
             //update bailleur
             $bailleur = User::findOrFail($bien->bailleur);
-            $solde = $bailleur->solde + $montantttc;
+            $solde = $bailleur->solde + $Operation->montantPaye;
             DB::table('users')
                 ->where('id', $bien->bailleur)
                 ->update(['solde' => $solde]);
             //update propriétaire
             $prop = User::findOrFail(1);
             $commission = $prop->commission + $request['commission'];
+            $soldeTVA = $prop->tva + $Operation->tva;
+            $soldeTEOM =  $prop->teom + $Operation->teom;
+            $soldeDE = $prop->de + $Operation->de;
             $soldeP = $prop->solde + $commission;
             DB::table('users')
                 ->where('id',  1)
-                ->update(['solde' => $soldeP, 'commission' => $commission]);
+                ->update(['solde' => $soldeP, 'commission' => $commission,'tva' => $soldeTVA, 'teom' => $soldeTEOM, 'de' => $soldeDE]);
         }
 
 
@@ -232,7 +265,7 @@ class OperationsController extends Controller
             ['operations', '=', $request['operation_id']],
             ['date', '=', $request['date']],
         ])->first();
-            
+
         if ($paie) {
             return Response()->json([
                 "status" => 500,
@@ -246,6 +279,48 @@ class OperationsController extends Controller
         $prix = $request['prix'];
         $montant = $request['montant'];
         $soleBien = $bien->solde + $montant;
+        $Operation = DB::table('operations')
+            ->where('operation_id', $request['operation_id'])->first();
+
+
+        $paiement = new Paiements();
+        $paiement->date = $request['date'];
+        $paiement->commission = $Operation->commission;
+        $paiement->ref = rand(0, 1000000);
+        $paiement->operations = $Operation->operation_id;
+
+
+        if ($request['charge'] &&  $request['charge'] > 0) {
+            $paiement->charge = $request['charge'];
+        } else {
+            $paiement->charge = 0;
+        }
+
+        $charge =  $paiement->charge + $request['montant'];
+
+        if ($request['tva'] == "true") {
+            $paiement->tva =  $request['montant'] * 0.18;
+        } else {
+            $paiement->tva = 0;
+        }
+        if ($request['teom'] == "true") {
+            $paiement->teom =  $request['montant'] * 0.036;
+        } else {
+            $paiement->teom =  0;
+        }
+        if ($request['de'] == "true") {
+            $paiement->de =  $request['montant'] * 0.02;
+        } else {
+            $paiement->de = 0;
+        }
+
+        $paiement->taxes =  $paiement->tva +  $paiement->teom + $paiement->de;
+
+        $sup = $paiement->taxes + $charge;
+
+        $paiement->montant = $sup;
+
+
         if ($montant < $prix) {
             return Response()->json([
                 "status" => 500,
@@ -284,22 +359,14 @@ class OperationsController extends Controller
                 //update propriétaire
                 $prop = User::findOrFail(1);
                 $commission = $prop->commission + $request['commission'];
+                $soldeTVA = $prop->tva + $paiement->tva;
+                $soldeTEOM =  $prop->teom + $paiement->teom;
+                $soldeDE = $prop->de + $paiement->de;
                 $soldeP = $prop->solde + $commission;
                 DB::table('users')
                     ->where('id',  1)
-                    ->update(['solde' => $soldeP, 'commission' => $commission]);
+                    ->update(['solde' => $soldeP, 'commission' => $commission,'tva' => $soldeTVA, 'teom' => $soldeTEOM, 'de' => $soldeDE]);
             }
-
-            $Operation = DB::table('operations')
-                ->where('operation_id', $request['operation_id'])->first();
-
-         
-            $paiement = new Paiements();
-            $paiement->montant = $request['montant'];
-            $paiement->date = $request['date'];
-            $paiement->commission = $Operation->commission;
-            $paiement->ref = rand(0, 1000000);
-            $paiement->operations = $Operation->operation_id;
 
             $paiement->save();
 

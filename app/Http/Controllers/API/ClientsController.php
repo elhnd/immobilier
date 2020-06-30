@@ -87,10 +87,6 @@ class ClientsController extends Controller
                     'solde' => 0
             ]);
         }
-
-     
-
- 
     }
 
 
