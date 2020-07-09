@@ -8,6 +8,7 @@
       role="dialog"
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
+      v-if="recapBailleur==false"
     >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -20,7 +21,7 @@
           </div>
           <!--Body-->
           <div class="modal-body">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
               <tbody>
                 <tr>
                   <th scope="row">Nom Complet</th>
@@ -64,12 +65,67 @@
           <!--Footer-->
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Fermer</button>
+            <button
+              type="button"
+              class="btn btn-outline-success"
+              @click="modalDateRecap()"
+            >Générer rapport</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="modal fade"
+      id="modalDateRecap"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+      v-if="recapBailleur==false"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <!--Header-->
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Bailleur</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <!--Body-->
+          <div class="modal-body">
+            <div class="col">
+              <div class="input-group mb-2">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">mois</div>
+                </div>
+                <input
+                  v-model="dateRecap"
+                  type="month"
+                  class="form-control"
+                  name="date"
+                  placeholder="mois"
+                  :class="{ 'is-invalid': form.errors.has('date') }"
+                />
+                <has-error :form="form" field="date"></has-error>
+              </div>
+            </div>
+          </div>
+          <!--Footer-->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Fermer</button>
+            <button
+              type="button"
+              class="btn btn-outline-success"
+              @click="rapportBailleur(DetailBailleur.id)"
+            >Générer rapport</button>
           </div>
         </div>
       </div>
     </div>
     <!-- Modal: modalBailleur -->
-    <div class="row mt-5" v-if="$gate.isAdmin()" v-show="!detail">
+    <div class="row mt-5" v-if="$gate.isAdmin()" v-show="!detail && recapBailleur==false">
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
@@ -137,6 +193,7 @@
       role="dialog"
       aria-labelledby="addNewLabel"
       aria-hidden="true"
+      v-if="recapBailleur==false"
     >
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -267,8 +324,7 @@
     </div>
 
     <!-- /.content -->
-
-    <section class="content">
+    <section class="content" v-if="recapBailleur">
       <div class="container-fluid">
         <div class="row">
           <div class="col-12">
@@ -277,37 +333,19 @@
               <!-- title row -->
               <div class="row">
                 <div class="col-12">
-                  <h4>
-                   
-                  </h4>
+                  <h4></h4>
                 </div>
                 <!-- /.col -->
               </div>
               <!-- info row -->
               <div class="row invoice-info">
                 <div class="col-sm-4 invoice-col">
-                
                   <address>
-                    <img src="/img/logo2.png" alt="">
+                    <img src="/img/logo2.png" alt />
                   </address>
                 </div>
                 <!-- /.col -->
-                <div class="col-sm-4 invoice-col">
-                  <!-- <h3>Bailleur</h3>
-                  <address>
-                    <strong>{{bailleurC.name}}</strong>
-                    <br />
-                    Phone: {{bailleurC.telephone}}
-                    <br />
-                    sexe: {{bailleurC.sexe}}
-                    <br />
-                    adresse: {{bailleurC.adresse}}
-                    <br />
-                    profession: {{bailleurC.profession}}
-                    <br />
-                    nationalité: {{bailleurC.nationalite}}
-                  </address> -->
-                </div>
+                <div class="col-sm-4 invoice-col"></div>
                 <!-- /.col -->
                 <div class="col-sm-4 invoice-col">
                   <!-- <h3>compte</h3>
@@ -316,7 +354,159 @@
                     numéro: {{bailleurC.numero}}
                     <br />
                     solde: {{bailleurC.solde}}
-                  </address> -->
+                  </address>-->
+                  <p>
+                    OUEST FOIRE DERRIERE St. SHELL
+                    BP. 11 744 Dakar - Peytavin
+                    Tél : (221) 33 820 71 90 / 33 820 71 21
+                    Portable : (221)77 635 93 16
+                    Email: mbolyama1@hotmail.com
+                  </p>
+                </div>
+              </div>
+              <!-- /.row -->
+
+              <!-- Table row -->
+              <div class="row">
+                <div class="col-12 table-responsive">
+                  <div style="margin-left:20px">
+                    <H1 style="text-align:center">Récapitulatif Mensuel</H1>
+
+                    <P>
+                      <br />
+                      <strong>Date:</strong>
+                      {{dateReform}}
+                      <br />
+                      <strong>Bailleur:</strong>
+                      {{bailleur.name}}
+                      <br />
+                      <strong>email:</strong>
+                      {{bailleur.email}}
+                      <br />
+                      <strong>Tél:</strong>
+                      {{bailleur.telephone}}
+                      <br />
+                      <strong>Identification :</strong>
+                      {{bailleur.numero}}
+                    </P>
+                    <strong>Opérations du moi</strong>
+                    <div class="card-body table-responsive p-0">
+                      <table id="table" class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Biens</th>
+                            <th>Prix</th>
+                            <th>Statut</th>
+                            <th>Caution</th>
+                            <th>Montant payé</th>
+                            <th>Solde</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="operation in operations" :key="operation.id">
+                            <td>{{operation.details}}</td>
+                            <td>{{operation.prix}}</td>
+                            <td v-if="operation.louer==true">loué</td>
+                            <td v-else>non loué</td>
+                            <td>{{operation.caution}}</td>
+                            <td>{{operation.montantPaye}}</td>
+                            <td>{{operation.solde}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <strong>Paiements du moi</strong>
+                    <div class="card-body table-responsive p-0">
+                      <table id="table" class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Biens</th>
+                            <th>Prix</th>
+                            <th>Statut</th>
+                            <th>Montant</th>
+                            <th>Statut paiement</th>
+                            <th>Solde</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="paiement in paiements" :key="paiement.id">
+                            <td>{{paiement.details}}</td>
+                            <td>{{paiement.prix}}</td>
+                            <td v-if="paiement.louer==true">loué</td>
+                            <td v-else>non loué</td>
+                            <td>{{paiement.montant}}</td>
+                            <td v-if="paiement.statutPaiement=='payer'">Payé</td>
+                            <td v-else>Non Payé</td>
+                            <td>{{paiement.solde}}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+
+              <!-- /.row -->
+
+              <!-- this row will not appear when printing -->
+              <div class="row">
+                <div class="row no-print" @click="printDetails()">
+                  <div class="col-12">
+                    <button type="button" class="btn btn-success float-right">
+                      <i class="fas fa-print"></i>
+                      Imprimer
+                    </button>
+                  </div>
+                </div> &nbsp;
+                <div class="row no-print" @click="annuler()">
+                  <div class="col-12">
+                    <button type="button" class="btn btn-primary float-right">Annuler</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.invoice -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+    <section class="content" v-if="recapBailleur==false">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <!-- Main content -->
+            <div class="invoice p-3 mb-3">
+              <!-- title row -->
+              <div class="row">
+                <div class="col-12">
+                  <h4></h4>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- info row -->
+              <div class="row invoice-info">
+                <div class="col-sm-4 invoice-col">
+                  <address>
+                    <img src="/img/logo2.png" alt />
+                  </address>
+                </div>
+                <!-- /.col -->
+                <div class="col-sm-4 invoice-col"></div>
+                <!-- /.col -->
+                <div class="col-sm-4 invoice-col">
+                  <!-- <h3>compte</h3>
+                  <address>
+                    <br />
+                    numéro: {{bailleurC.numero}}
+                    <br />
+                    solde: {{bailleurC.solde}}
+                  </address>-->
                   <p>
                     OUEST FOIRE DERRIERE St. SHELL
                     BP. 11 744 Dakar - Peytavin
@@ -335,8 +525,9 @@
                     <H1 style="text-align:center">MANDAT DE GERANCE</H1>
 
                     <P>
-                      <br>
-                      <strong>Entre …………………………….</strong> CNI N° ……………………… délivrée le {{date|myDate}} à Dakar
+                      <br />
+                      <strong>Entre …………………………….</strong>
+                      CNI N° ……………………… délivrée le {{date|myDate}} à Dakar
                       <br />
                       <strong>Demeurant {{bailleurC.adresse}}</strong>
                       <br />
@@ -505,6 +696,12 @@ export default {
   },
   data() {
     return {
+      dateReform: "",
+      recapBailleur: false,
+      dateRecap: "",
+      bailleur: {},
+      operations: [],
+      paiements: [],
       detail: false,
       editmode: false,
       bailleurs: {},
@@ -536,12 +733,44 @@ export default {
     };
   },
   methods: {
+    rapportBailleur(id) {
+      $("#modalDateRecap").modal("hide");
+      $("#modalCart").modal("hide");
+      $("#addNew").modal("hide");
+
+      this.recapBailleur = true;
+      var date = this.dateRecap;
+      var dateSplit = date.split("-");
+      this.dateReform = dateSplit[1] + "/" + dateSplit[0];
+      axios.get("api/rapportbailleur/" + id).then(response => {
+        var operationsDate = [];
+        var paiementsDate = [];
+        response.data.operations.filter(data => {
+          if (data.dateEntre && data.dateEntre.indexOf(this.dateRecap) > -1) {
+            operationsDate.push(data);
+          }
+        });
+        response.data.paiements.filter(data => {
+          if (data.date && data.date.indexOf(this.dateRecap) > -1) {
+            paiementsDate.push(data);
+          }
+        });
+        this.bailleur = response.data.bailleur;
+        this.operations = operationsDate;
+        this.paiements = paiementsDate;
+        console.log(this.operations);
+        console.log(this.paiements);
+      });
+    },
     printDetails() {
       window.print();
       this.detail = false;
     },
     print() {
       this.detail = true;
+    },
+    annuler() {
+      location.reload(true);
     },
     // Our method to GET results from a Laravel endpoint
     getResults(page = 1) {
@@ -553,6 +782,9 @@ export default {
       axios.get("api/typeballieurs").then(response => {
         this.typebailleurs = response.data;
       });
+    },
+    modalDateRecap() {
+      $("#modalDateRecap").modal("show");
     },
     detailBailleur(b) {
       this.formB.id = b.id;
@@ -610,7 +842,11 @@ export default {
           this.form
             .delete("api/bailleurs/" + id)
             .then(() => {
-              Swal.fire("Suppresion...", "Le bailleur a été supprimé avec succès", "success");
+              Swal.fire(
+                "Suppresion...",
+                "Le bailleur a été supprimé avec succès",
+                "success"
+              );
               Fire.$emit("AfterCreate");
             })
             .catch(() => {

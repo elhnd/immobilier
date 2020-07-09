@@ -44,7 +44,7 @@ Route::apiResources(['typeclients'=>'API\TypeclientsController']);
 Route::apiResources(['bailleurs'=>'API\BailleursController']);
 Route::get('countbailleurs','API\BailleursController@countbailleurs');
 Route::post('countbiensbailleurs','API\BailleursController@countbiensbailleurs');
-
+Route::get('rapportbailleur/{id}','API\BailleursController@rapportBailleur');
 
 //clients
 Route::apiResources(['clients'=>'API\ClientsController']);

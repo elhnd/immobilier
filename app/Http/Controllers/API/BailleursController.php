@@ -7,6 +7,8 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Operations;
+use App\Paiements;
 use Illuminate\Support\Facades\Hash;
 
 
@@ -31,9 +33,9 @@ class BailleursController extends Controller
     {
         //return User::latest()->paginate(10);
         return DB::table('users')
-        ->where('type', 'bailleurs')
-        ->leftJoin('typebailleurs', 'typebailleurs.typebailleurs_id', '=', 'users.typebailleur')
-        ->select('users.*', 'typebailleurs.*')->paginate(10);
+            ->where('type', 'bailleurs')
+            ->leftJoin('typebailleurs', 'typebailleurs.typebailleurs_id', '=', 'users.typebailleur')
+            ->select('users.*', 'typebailleurs.*')->paginate(10);
     }
 
     /**
@@ -138,9 +140,41 @@ class BailleursController extends Controller
     }
     public function countbiensbailleurs(Request $request)
     {
-        $id= strval( $request['id'] );
+        $id = strval($request['id']);
         return Biens::where('bailleur', $id)->count();
+    }
 
-    
+    public function rapportBailleur(Request $request, $id)
+    {
+        $bailleur = User::findOrFail($id);
+
+        if ($bailleur->type !== 'bailleurs') {
+
+            return response()->json(["error" => "Cet utilisateur n'est pas un bailleur"], 401);
+        }
+
+        $operations =  DB::table('biens')
+            ->where('bailleur', $id)
+            ->leftJoin('operations', 'operations.biens', '=', 'biens.bien_id')
+            ->leftJoin('paiements', 'operations.operation_id', '=', 'paiements.operations')
+            ->select('biens.details', 'biens.solde', 'biens.louer', 'biens.prix', 'operations.*')->get();
+        $paiements =  DB::table('biens')
+            ->where('bailleur', $id)
+            ->leftJoin('operations', 'operations.biens', '=', 'biens.bien_id')
+            ->leftJoin('paiements', 'operations.operation_id', '=', 'paiements.operations')
+            ->select('biens.details', 'biens.solde', 'biens.louer', 'biens.prix', 'paiements.*')->get();
+        $newPaiement = [];
+        foreach ($paiements as $paiement) {
+            if ($paiement->operations !== null) {
+                array_push($newPaiement, $paiement);
+            }
+        }
+        $data = [
+            'bailleur' => $bailleur,
+            'operations' => $operations,
+            'paiements' => $newPaiement
+        ];
+
+        return response()->json($data);
     }
 }

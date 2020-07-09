@@ -8,6 +8,7 @@ use App\Lieuxes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Paiements;
 
 class BiensController extends Controller
 {
@@ -165,6 +166,4 @@ class BiensController extends Controller
     {
         return Biens::count();
     }
-
-
 }
